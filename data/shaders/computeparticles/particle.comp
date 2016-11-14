@@ -50,13 +50,55 @@ void main()
 
     // Current SSBO index
     uint index = gl_GlobalInvocationID.x;
-	// Don't try to write beyond particle count
+	  // Don't try to write beyond particle count
     if (index >= ubo.particleCount)
 		return;
+
+    vec2 centerOfMass = vec2(0.0, 0.0); // Rule 1
+		vec2 seperation = vec2(0.0, 0.0);   // Rule 2
+		vec2 alignment = vec2(0.0, 0.0);    // Rule 3
+		float neighborOfCountRule1 = 0.0;
+		float neighborOfCountRule3 = 0.0;
+		float distanceBetweenTwoBoids = 0.0;
 
     // Read position and velocity
 		vec2 vPos = particlesA[index].pos.xy;
     vec2 vVel = particlesA[index].vel.xy;
+
+    for (int i = 0; i < ubo.particleCount; ++i) {
+	      if (i == index) {
+ 	      		continue;
+ 	      }
+        distanceBetweenTwoBoids = distance(particlesA[i].pos, vPos);
+				if (distanceBetweenTwoBoids < ubo.rule1Distance) {
+     			  centerOfMass += particlesA[i].pos.xy;
+ 		    	  neighborOfCountRule1 += 1.0;
+ 		    }
+
+				if (distanceBetweenTwoBoids < ubo.rule2Distance) {
+ 	  			  seperation -= particlesA[i].pos.xy - vPos;
+  			}
+
+        if (distanceBetweenTwoBoids < ubo.rule3Distance) {
+				    alignment += particlesA[i].vel.xy;
+						neighborOfCountRule3 += 1.0;
+				}
+		}
+
+		if (neighborOfCountRule1 > 0.0) {
+				centerOfMass /= neighborOfCountRule1;
+				vVel += (centerOfMass - vPos) * ubo.rule1Scale;
+		}
+
+// Refer to project 1 feedback, maybe we do not need to subtract this time?
+
+		if(neighborOfCountRule3 > 0.0) {
+				alignment /= neighborOfCountRule3;
+				vVel += alignment * ubo.rule3Scale;
+		}
+
+		vVel += seperation * ubo.rule2Scale;
+
 
 		// clamp velocity for a more pleasing simulation.
 		vVel = normalize(vVel) * clamp(length(vVel), 0.0, 0.1);
