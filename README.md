@@ -16,7 +16,7 @@ So the descriptor here is to help us update the mapping relationship to each buf
 With the help of descriptor, we could use command buffer with more flexibility.
 
 #### Describe a situation besides flip-flop buffers in which you may need multiple descriptor sets to fit one descriptor layout.
-When we have color map, normal map, depth map, etc. and we want to map these to the same scene, we could put them as different descriptor sets in a single descriptor layouy, and during the process we use different sets to fit different stages' needs.
+When we have color map, normal map, depth map, etc. and we want to map these to the same scene, we could put them as different descriptor sets in a single descriptor layout, and during the process we use different sets to fit different stages' needs.
 
 #### What are some problems to keep in mind when using multiple Vulkan queues?
 The notion of queues are how work becomes serialised to be passed to the GPU. When using multiple vulkan queues, we need to include sync primitives for queue to wait before processing the submitted work, and signal when the work in this submission is completed.
